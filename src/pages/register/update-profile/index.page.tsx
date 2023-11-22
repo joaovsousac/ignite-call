@@ -1,4 +1,11 @@
-import { Avatar, Button, Heading, MultiStep, Text, TextArea } from '@ignite-ui/react'
+import {
+  Avatar,
+  Button,
+  Heading,
+  MultiStep,
+  Text,
+  TextArea,
+} from '@ignite-ui/react'
 import { ArrowRight } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { set, z } from 'zod'
@@ -10,6 +17,7 @@ import { useSession } from 'next-auth/react'
 import { getServerSession } from 'next-auth'
 import { buildNextAuthOptions } from '@/pages/api/auth/[...nextauth].api'
 import { api } from '@/lib/axios'
+import { useRouter } from 'next/router'
 
 const updateProfileSchema = z.object({
   bio: z.string(),
@@ -18,73 +26,76 @@ const updateProfileSchema = z.object({
 type UpdateProfileData = z.infer<typeof updateProfileSchema>
 
 export default function UpdateProfile() {
-    const {
-        register,
-        handleSubmit,
-        formState: { isSubmitting },
-    } = useForm<UpdateProfileData>({
-        resolver: zodResolver(updateProfileSchema),
-        defaultValues: {},
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<UpdateProfileData>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {},
+  })
+
+  const session = useSession()
+  const router = useRouter()
+
+  console.log(session)
+
+  async function handleUpdateProfile(data: UpdateProfileData) {
+    await api.put('/users/profile', {
+      bio: data.bio,
     })
 
-    const session = useSession()
+    await router.push(`/schedule/${session.data?.user.username}`)
+  }
 
-    console.log(session)
+  return (
+    <Container>
+      <Header>
+        <Heading as="strong">Bem-vindo ao Ignite Call!</Heading>
+        <Text>
+          Precisamos de algumas informações para criar seu perfil! Ah, você pode
+          editar essas informações depois.
+        </Text>
 
-    async function handleUpdateProfile(data: UpdateProfileData) {
-        await api.put('/users/profile', {
-          bio: data.bio,
-        })
-    }
+        <MultiStep size={4} currentStep={3} />
+      </Header>
 
-    return (
-        <Container>
-            <Header>
-                <Heading as="strong">Bem-vindo ao Ignite Call!</Heading>
-                <Text>
-                    Precisamos de algumas informações para criar seu perfil! Ah, você pode
-                    editar essas informações depois.
-                </Text>
+      <ProfileBox as="form" onSubmit={handleSubmit(handleUpdateProfile)}>
+        <label>
+          <Text size="sm">Foto de perfil</Text>
+          <Avatar
+            src={session.data?.user.avatar_url}
+            referrerPolicy="no-referrer"
+          />
+        </label>
 
-                <MultiStep size={4} currentStep={3} />
-            </Header>
+        <label>
+          <Text size="sm">Sobre você</Text>
+          <TextArea {...register('bio')} />
+          <FormAnnotation>
+            Fale um pouco sobre você. Isto será exibido em sua página pessoal
+          </FormAnnotation>
+        </label>
 
-            <ProfileBox as="form" onSubmit={handleSubmit(handleUpdateProfile)}>
-                <label>
-                    <Text size="sm">Foto de perfil</Text>
-                    <Avatar 
-                    src={session.data?.user.avatar_url}
-                    referrerPolicy='no-referrer'
-                    />
-                </label>
-
-                <label>
-                    <Text size="sm">Sobre você</Text>
-                    <TextArea {...register('bio')} />
-                    <FormAnnotation>
-                        Fale um pouco sobre você. Isto será exibido em sua página pessoal
-                    </FormAnnotation>
-                </label>
-
-                <Button type="submit">
-                    Finalizar
-                    <ArrowRight />
-                </Button>
-            </ProfileBox>
-        </Container>
-    )
+        <Button type="submit">
+          Finalizar
+          <ArrowRight />
+        </Button>
+      </ProfileBox>
+    </Container>
+  )
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getServerSession(
     req,
     res,
-    buildNextAuthOptions(req, res)
+    buildNextAuthOptions(req, res),
   )
 
   return {
     props: {
-        session,
+      session,
     },
   }
 }
