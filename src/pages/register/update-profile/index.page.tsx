@@ -18,6 +18,7 @@ import { getServerSession } from 'next-auth'
 import { buildNextAuthOptions } from '@/pages/api/auth/[...nextauth].api'
 import { api } from '@/lib/axios'
 import { useRouter } from 'next/router'
+import { NextSeo } from 'next-seo'
 
 const updateProfileSchema = z.object({
   bio: z.string(),
@@ -49,6 +50,8 @@ export default function UpdateProfile() {
   }
 
   return (
+    <>
+   <NextSeo title="Atualize seu perfil | Ignite Call" noindex/>
     <Container>
       <Header>
         <Heading as="strong">Bem-vindo ao Ignite Call!</Heading>
@@ -83,6 +86,7 @@ export default function UpdateProfile() {
         </Button>
       </ProfileBox>
     </Container>
+    </>
   )
 }
 
