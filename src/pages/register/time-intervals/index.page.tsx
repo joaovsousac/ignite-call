@@ -135,7 +135,7 @@ export default function TimeIntervals() {
                         return (
                           <Checkbox
                             onCheckedChange={(checked) => {
-                              field.onChange(checked == true)
+                              field.onChange(checked === true)
                             }}
                             checked={field.value}
                           />

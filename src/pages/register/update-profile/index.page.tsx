@@ -8,7 +8,7 @@ import {
 } from '@ignite-ui/react'
 import { ArrowRight } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
-import { set, z } from 'zod'
+import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Container, Header } from '../styles'
 import { FormAnnotation, ProfileBox } from './styles'
@@ -27,11 +27,7 @@ const updateProfileSchema = z.object({
 type UpdateProfileData = z.infer<typeof updateProfileSchema>
 
 export default function UpdateProfile() {
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm<UpdateProfileData>({
+  const { register, handleSubmit } = useForm<UpdateProfileData>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {},
   })
