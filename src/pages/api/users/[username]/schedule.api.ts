@@ -29,31 +29,30 @@ export default async function handle(
     name: z.string(),
     email: z.string().email(),
     observations: z.string(),
-    date: z.string().datetime()
+    date: z.string().datetime(),
   })
   const { name, email, observations, date } = createSchedulingBody.parse(
-    req.body
+    req.body,
   )
 
-  const schedulingDate = dayjs(date)
-    .startOf('hour')
+  const schedulingDate = dayjs(date).startOf('hour')
 
   if (schedulingDate.isBefore(new Date())) {
     return res.status(400).json({
-      message: 'Date is in the past.'
+      message: 'Date is in the past.',
     })
   }
 
   const conflictingScheduling = await prisma.scheduling.findFirst({
     where: {
       user_id: user.id,
-      date: schedulingDate.toDate()
-    }
+      date: schedulingDate.toDate(),
+    },
   })
 
   if (conflictingScheduling) {
     return res.status(400).json({
-      message: 'There is another scheduling at the same time.'
+      message: 'There is another scheduling at the same time.',
     })
   }
 
@@ -64,12 +63,12 @@ export default async function handle(
       observations,
       date: schedulingDate.toDate(),
       user_id: user.id,
-    }
+    },
   })
 
   const calendar = google.calendar({
     version: 'v3',
-    auth: await getGoogleOAuthToken(user.id)
+    auth: await getGoogleOAuthToken(user.id),
   })
 
   await calendar.events.insert({
@@ -82,18 +81,18 @@ export default async function handle(
         dateTime: schedulingDate.format(),
       },
       end: {
-        dateTime: schedulingDate.add(1, 'hour').format()
+        dateTime: schedulingDate.add(1, 'hour').format(),
       },
       attendees: [{ email, displayName: name }],
       conferenceData: {
-         createRequest: {
+        createRequest: {
           requestId: scheduling.id,
           conferenceSolutionKey: {
-            type: 'hangoutsMeet'
-          }
-         }
+            type: 'hangoutsMeet',
+          },
+        },
       },
-    }
+    },
   })
 
   return res.status(201).end()

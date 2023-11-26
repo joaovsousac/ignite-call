@@ -7,7 +7,6 @@ import '../lib/dayjs'
 import { queryClient } from '@/lib/react-query'
 import { DefaultSeo } from 'next-seo'
 
-
 globalStyles()
 
 export default function App({
