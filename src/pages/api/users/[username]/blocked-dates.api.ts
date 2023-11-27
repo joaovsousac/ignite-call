@@ -73,5 +73,5 @@ HAVING COUNT(S.date) >= ((UTI.time_end_in_minutes - UTI.time_start_in_minutes) /
 
   const blockedDates = blockedDatesRaw.map((item) => item.date)
 
-return res.json({ blockedWeekDays, blockedDates })
+  return res.json({ blockedWeekDays, blockedDates })
 }
